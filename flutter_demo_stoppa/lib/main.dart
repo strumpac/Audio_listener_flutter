@@ -40,7 +40,13 @@ class _ListenerHomePageState extends State<ListenerHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Audio listener'
+          'Audio listener',
+          style: TextStyle(
+            fontSize: 20.0,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Raleway',
+            color: Colors.black
+          ),
           ),
         backgroundColor: Theme.of(
         context).colorScheme.inversePrimary,
@@ -80,7 +86,10 @@ class _ListenerHomePageState extends State<ListenerHomePage> {
   }
 
   void pickFile() async{
-    result = await FilePicker.platform.pickFiles();
+    result = await FilePicker.platform.pickFiles(
+      initialDirectory: "Memoria/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp VoiceNotes"
+    );
+
     setState(() {});
   }
 
