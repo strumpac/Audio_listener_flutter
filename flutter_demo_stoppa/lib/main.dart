@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:quickalert/quickalert.dart';
 
 void main() {
   runApp(const ListenAudio());
@@ -16,12 +17,13 @@ class ListenAudio extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.green,
           brightness: Brightness.dark,
-          ),
+        ),
       ),
-          home: const ListenerHomePage(),
+      home: const ListenerHomePage(),
     );
   }
 }
+
 class ListenerHomePage extends StatefulWidget {
   const ListenerHomePage({super.key});
 
@@ -42,14 +44,12 @@ class _ListenerHomePageState extends State<ListenerHomePage> {
         title: const Text(
           'Audio listener',
           style: TextStyle(
-            fontSize: 20.0,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Raleway',
-            color: Colors.black
-          ),
-          ),
-        backgroundColor: Theme.of(
-        context).colorScheme.inversePrimary,
+              fontSize: 20.0,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Raleway',
+              color: Colors.black),
+        ),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: Center(
         child: Column(
@@ -59,8 +59,8 @@ class _ListenerHomePageState extends State<ListenerHomePage> {
               height: 300,
             ),
             result == null
-              ? const Text('scegli un vocale')
-              : Text(result!.files.single.name),
+                ? const Text('scegli un vocale')
+                : Text(result!.files.single.name),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -68,11 +68,15 @@ class _ListenerHomePageState extends State<ListenerHomePage> {
                   onPressed: playAudio,
                   icon: const Icon(Icons.play_arrow),
                   iconSize: 100,
-                  ),
+                ),
+                IconButton(
+                  onPressed: alertCall,
+                  icon: const Icon(Icons.warning),
+                ),
                 ElevatedButton(
                   onPressed: playbackRate,
                   child: Text('x$playRate'),
-                  ),
+                ),
               ],
             ),
           ],
@@ -81,27 +85,40 @@ class _ListenerHomePageState extends State<ListenerHomePage> {
       floatingActionButton: FloatingActionButton(
         onPressed: pickFile,
         child: const Icon(Icons.audio_file),
-        ),
+      ),
     );
   }
 
-  void pickFile() async{
+  void pickFile() async {
     result = await FilePicker.platform.pickFiles(
-      initialDirectory: "Memoria/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp VoiceNotes"
-    );
-
-    setState(() {});
+        initialDirectory:
+            'OnePlus Nord CE Lite 2/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Voice Notes');
+    if(result!.files.single.extension == "opus")
+    {
+      setState(() {});
+    }else{
+      alertCall();
+    }
   }
 
   void playAudio() {
-    if(result != null){
+    if (result != null) {
       audioPlayer.play(DeviceFileSource(result!.files.single.path!));
     }
   }
 
   void playbackRate() {
-    playRate = playRate == 1? 2: 1;
+    playRate = playRate == 1 ? 2 : 1;
     audioPlayer.setPlaybackRate(playRate);
     setState(() {});
+  }
+
+  void alertCall() {
+    QuickAlert.show(
+      context: context,
+      type: QuickAlertType.error,
+      title: 'Oops...',
+      text: 'Il file selezionato non è un audio',
+    );
   }
 }
