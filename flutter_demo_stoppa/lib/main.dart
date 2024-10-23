@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:quickalert/quickalert.dart';
+import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 
 void main() {
   runApp(const ListenAudio());
@@ -36,6 +37,19 @@ class _ListenerHomePageState extends State<ListenerHomePage> {
 
   AudioPlayer audioPlayer = AudioPlayer();
   double playRate = 1;
+  var isPaused = false;
+  var progressvalue=0; 
+  var durationValue = 0; 
+
+  @override
+  void initState() {
+    super.initState();
+    audioPlayer.onPositionChanged.listen((Duration d){
+      setState(() {
+        progressvalue = d.inMilliseconds;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,11 +81,12 @@ class _ListenerHomePageState extends State<ListenerHomePage> {
                 IconButton(
                   onPressed: playAudio,
                   icon: const Icon(Icons.play_arrow),
-                  iconSize: 100,
                 ),
                 IconButton(
-                  onPressed: alertCall,
-                  icon: const Icon(Icons.warning),
+                    onPressed: pauseAudio, icon: const Icon(Icons.pause)),
+                IconButton(
+                  onPressed: stopAudio,
+                  icon: const Icon(Icons.stop),
                 ),
                 ElevatedButton(
                   onPressed: playbackRate,
@@ -79,6 +94,7 @@ class _ListenerHomePageState extends State<ListenerHomePage> {
                 ),
               ],
             ),
+            slider(),
           ],
         ),
       ),
@@ -93,17 +109,20 @@ class _ListenerHomePageState extends State<ListenerHomePage> {
     result = await FilePicker.platform.pickFiles(
         initialDirectory:
             'OnePlus Nord CE Lite 2/Android/media/com.whatsapp/WhatsApp/Media/Whatsapp Voice Notes');
-    if(result!.files.single.extension == "opus")
-    {
+    if (result!.files.single.extension == "opus") {
+      durationValue = result!.files.single.size;
+      slider();
       setState(() {});
-    }else{
+    } else {
       alertCall();
     }
   }
 
   void playAudio() {
-    if (result != null) {
+    if (result != null && !isPaused) {
       audioPlayer.play(DeviceFileSource(result!.files.single.path!));
+    } else if (result != null && isPaused) {
+      audioPlayer.resume();
     }
   }
 
@@ -120,5 +139,25 @@ class _ListenerHomePageState extends State<ListenerHomePage> {
       title: 'Oops...',
       text: 'Il file selezionato non è un audio',
     );
+  }
+
+  void pauseAudio() {
+    audioPlayer.pause();
+    setState(() {});
+  }
+
+  void stopAudio() {
+    audioPlayer.stop();
+    setState(() {});
+  }
+
+  Widget slider(){
+    return ProgressBar(
+              progress: Duration(milliseconds: progressvalue),
+              total: Duration(milliseconds: durationValue),
+              onSeek: (duration) {
+                audioPlayer.seek(duration);
+              },
+            );
   }
 }
